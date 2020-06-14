@@ -253,17 +253,14 @@ def dqn_learing(
 
             for j in range(batch_size):
                 with torch.no_grad():
-                    if done_mask[j] == 0.0:
-                        next_obs = next_obs_batch[j].unsqueeze(0) / 255.0
-                        y = rew_batch[j] + gamma * Q_target(next_obs).max(1)[0]
-                    else:
-                        y = rew_batch[j]
+                    next_obs = next_obs_batch[j].unsqueeze(0) / 255.0
+                    y = rew_batch[j] + (1.0 - done_mask[j]) * gamma * Q_target(next_obs).max(1)[0]
 
                 optimizer.zero_grad()
                 obs = obs_batch[j].unsqueeze(0) / 255.0
                 bellman_error = (y - Q(obs).squeeze()[act_batch[j]])
-                bellman_error = torch.clamp(bellman_error, -1.0, 1.0) ** 2
-                bellman_error.backward()
+                loss = torch.clamp(bellman_error, -1.0, 1.0) ** 2
+                loss.backward()
                 optimizer.step()
 
             num_param_updates += 1
