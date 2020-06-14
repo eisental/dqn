@@ -116,9 +116,10 @@ def dqn_learing(
         sample = random.random()
         eps_threshold = exploration.value(t)
         if sample > eps_threshold:
-            obs = torch.from_numpy(obs).type(dtype).unsqueeze(0) / 255.0
+            obs = torch.from_numpy(obs).type(dtype)
             if USE_CUDA:
                 obs = obs.cuda()
+            obs = obs.unsqueeze(0) / 255.0
             with torch.no_grad():
                 return model(obs).max(1)[1].cpu()
         else:
@@ -262,7 +263,7 @@ def dqn_learing(
                 optimizer.zero_grad()
                 obs = obs_batch[j].unsqueeze(0) / 255.0
                 bellman_error = (y - Q(obs).squeeze()[act_batch[j]])
-                bellman_error = torch.clamp(bellman_error, -1.0, 1.0) ** 2
+                bellman_error = -1 * (torch.clamp(bellman_error, -1.0, 1.0) ** 2)
                 bellman_error.backward()
                 optimizer.step()
 
