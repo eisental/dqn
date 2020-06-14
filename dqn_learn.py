@@ -20,7 +20,6 @@ from utils.gym import get_wrapper_by_name
 USE_CUDA = torch.cuda.is_available()
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
-
 class Variable(autograd.Variable):
     def __init__(self, data, *args, **kwargs):
         if USE_CUDA:
@@ -118,6 +117,8 @@ def dqn_learing(
         eps_threshold = exploration.value(t)
         if sample > eps_threshold:
             obs = torch.from_numpy(obs).type(dtype).unsqueeze(0) / 255.0
+            if USE_CUDA:
+                obs = obs.cuda()
             with torch.no_grad():
                 return model(obs).max(1)[1].cpu()
         else:
@@ -128,6 +129,10 @@ def dqn_learing(
 
     Q = q_func(input_arg, num_actions)
     Q_target = q_func(input_arg, num_actions)
+
+    if USE_CUDA:
+        Q = Q.cuda()
+        Q_target = Q_target.cuda()
 
     # start with same parameters for both nets.
     Q_target.load_state_dict(Q.state_dict())
@@ -185,7 +190,6 @@ def dqn_learing(
         # might as well be random, since you haven't trained your net...)
         #####
 
-        # YOUR CODE HERE
         idx = replay_buffer.store_frame(last_obs)
         encoded_obs = replay_buffer.encode_recent_observation()
         action = select_epilson_greedy_action(Q, encoded_obs, t)
@@ -241,11 +245,11 @@ def dqn_learing(
             done_mask = torch.from_numpy(done_mask).type(dtype)
 
             if USE_CUDA:
-                obs_batch = obs_batch.gpu()
-                act_batch = act_batch.gpu()
-                rew_batch = rew_batch.gpu()
-                next_obs_batch = next_obs_batch.gpu()
-                done_mask = done_mask.gpu()
+                obs_batch = obs_batch.cuda()
+                act_batch = act_batch.cuda()
+                rew_batch = rew_batch.cuda()
+                next_obs_batch = next_obs_batch.cuda()
+                done_mask = done_mask.cuda()
 
             for j in range(batch_size):
                 with torch.no_grad():
