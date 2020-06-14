@@ -116,9 +116,10 @@ def dqn_learing(
         sample = random.random()
         eps_threshold = exploration.value(t)
         if sample > eps_threshold:
-            obs = torch.from_numpy(obs).type(dtype).unsqueeze(0) / 255.0
+            obs = torch.from_numpy(obs).type(dtype)
             if USE_CUDA:
                 obs = obs.cuda()
+            obs = obs.unsqueeze(0) / 255.0
             with torch.no_grad():
                 return model(obs).max(1)[1].cpu()
         else:
