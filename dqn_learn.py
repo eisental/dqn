@@ -276,7 +276,6 @@ def dqn_learing(
                 sum_error += bellman_error
 
             if num_param_updates % 100 == 0:
-                print(errors)
                 errors.append(sum_error.item())
 
             num_param_updates += 1
