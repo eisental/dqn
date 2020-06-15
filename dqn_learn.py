@@ -273,9 +273,10 @@ def dqn_learing(
                 # print(bellman_error, current, list(map(lambda p: p.grad, list(Q.parameters())[:1])))
                 optimizer.step()
 
-                sum_error += bellman_error.detach()
+                sum_error += bellman_error
 
-            errors.append(sum_error)
+            if num_param_updates % 100 == 0:
+                errors.append(sum_error.detach)
 
             num_param_updates += 1
             if num_param_updates % target_update_freq == 0:
