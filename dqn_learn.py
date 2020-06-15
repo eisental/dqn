@@ -160,7 +160,7 @@ def dqn_learing(
     mean_episode_reward = -float('nan')
     best_mean_episode_reward = -float('inf')
     last_obs = env.reset()
-    LOG_EVERY_N_STEPS = 100 #00
+    LOG_EVERY_N_STEPS = 10000
 
     for t in count():
         ### 1. Check stopping criterion
@@ -298,7 +298,7 @@ def dqn_learing(
         if t % LOG_EVERY_N_STEPS == 0 and t > learning_starts:
             plt.clf()
             plt.plot(errors)
-            plt.savefig(f"error{t}", dpi=300)
+            plt.savefig(f"error{t}")
             plt.close()
             print("Timestep %d" % (t,))
             print("mean reward (100 episodes) %f" % mean_episode_reward)
