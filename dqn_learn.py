@@ -297,8 +297,9 @@ def dqn_learing(
 
         if t % LOG_EVERY_N_STEPS == 0 and t > learning_starts:
             plt.clf()
-            plt.line(errors)
+            plt.plot(errors)
             plt.savefig(f"error{t}", dpi=300)
+            plt.close()
             print("Timestep %d" % (t,))
             print("mean reward (100 episodes) %f" % mean_episode_reward)
             print("best mean reward %f" % best_mean_episode_reward)
