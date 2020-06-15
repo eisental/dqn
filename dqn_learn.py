@@ -17,8 +17,12 @@ import torch.autograd as autograd
 from utils.replay_buffer import ReplayBuffer
 from utils.gym import get_wrapper_by_name
 
+# debug
+import matplotlib.pyplot as plt
+
 USE_CUDA = torch.cuda.is_available()
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+
 
 class Variable(autograd.Variable):
     def __init__(self, data, *args, **kwargs):
@@ -146,6 +150,9 @@ def dqn_learing(
     # Construct the replay buffer
     replay_buffer = ReplayBuffer(replay_buffer_size, frame_history_len)
 
+    # debug
+    errors = []
+
     ###############
     # RUN ENV     #
     ###############
@@ -252,20 +259,26 @@ def dqn_learing(
                 next_obs_batch = next_obs_batch.cuda()
                 done_mask = done_mask.cuda()
 
+            sum_error = 0
             for j in range(batch_size):
                 with torch.no_grad():
                     next_obs = next_obs_batch[j].unsqueeze(0) / 255.0
                     y = rew_batch[j] + (1.0 - done_mask[j]) * gamma * Q_target(next_obs).max(1)[0]
 
-                optimizer.zero_grad()
                 obs = obs_batch[j].unsqueeze(0) / 255.0
-                bellman_error = (y - Q(obs).squeeze()[act_batch[j]])
-                loss = torch.clamp(bellman_error, -1.0, 1.0) ** 2
-                loss.backward()
+                current = Q(obs).squeeze()[act_batch[j]]
+                bellman_error = (-torch.clamp((y - current), -1.0, 1.0)).squeeze()
+                optimizer.zero_grad()
+                current.backward(bellman_error)
+                # print(bellman_error, current, list(map(lambda p: p.grad, list(Q.parameters())[:1])))
                 optimizer.step()
 
+                sum_error += bellman_error.detach()
+
+            errors.append(sum_error)
+
             num_param_updates += 1
-            if (num_param_updates % target_update_freq == 0):
+            if num_param_updates % target_update_freq == 0:
                 print("updating target", num_param_updates)
                 Q_target.load_state_dict(Q.state_dict())
             #####
@@ -281,6 +294,9 @@ def dqn_learing(
         Statistic["best_mean_episode_rewards"].append(best_mean_episode_reward)
 
         if t % LOG_EVERY_N_STEPS == 0 and t > learning_starts:
+            plt.clf()
+            plt.plot(errors)
+            plt.savefig(f"error{t}", dpi=300)
             print("Timestep %d" % (t,))
             print("mean reward (100 episodes) %f" % mean_episode_reward)
             print("best mean reward %f" % best_mean_episode_reward)
