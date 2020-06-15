@@ -160,7 +160,7 @@ def dqn_learing(
     mean_episode_reward = -float('nan')
     best_mean_episode_reward = -float('inf')
     last_obs = env.reset()
-    LOG_EVERY_N_STEPS = 10000
+    LOG_EVERY_N_STEPS = 1000 #00
 
     for t in count():
         ### 1. Check stopping criterion
@@ -276,7 +276,8 @@ def dqn_learing(
                 sum_error += bellman_error
 
             if num_param_updates % 100 == 0:
-                errors.append(sum_error.detach().item())
+                print(errors)
+                errors.append(sum_error.cpu().item())
 
             num_param_updates += 1
             if num_param_updates % target_update_freq == 0:
