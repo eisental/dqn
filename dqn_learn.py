@@ -265,9 +265,6 @@ def dqn_learing(
             current.backward(d_error)
             optimizer.step()
 
-            if num_param_updates % 100 == 0:
-                errors.append(d_error.mean())
-
             num_param_updates += 1
             if num_param_updates % target_update_freq == 0:
                 print("updating target", num_param_updates)
