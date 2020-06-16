@@ -257,7 +257,7 @@ def dqn_learing(
                 act_batch = act_batch.cuda()
                 rew_batch = rew_batch.cuda()
                 next_obs_batch = next_obs_batch.cuda()
-                not_done_mask = done_mask.cuda()
+                not_done_mask = not_done_mask.cuda()
 
             """
             sum_error = 0
