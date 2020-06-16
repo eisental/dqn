@@ -265,11 +265,12 @@ def dqn_learing(
                     next_obs = next_obs_batch[j].unsqueeze(0) / 255.0
                     y = rew_batch[j] + (1.0 - done_mask[j]) * gamma * Q_target(next_obs).max(1)[0]
 
+                print(y)
                 obs = obs_batch[j].unsqueeze(0) / 255.0
                 current = Q(obs).squeeze()[act_batch[j]]
-                bellman_error = (-torch.clamp((y - current), -1.0, 1.0)).squeeze()
+                bellman_error = torch.clamp((current - y), -1.0, 1.0) ** 2
                 optimizer.zero_grad()
-                current.backward(bellman_error)
+                bellman_error.backward()
                 # print(bellman_error, current, list(map(lambda p: p.grad, list(Q.parameters())[:1])))
                 optimizer.step()
 
