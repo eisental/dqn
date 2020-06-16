@@ -264,13 +264,16 @@ def dqn_learing(
                 y.unsqueeze_(1)
 
             current = Q(obs_batch).gather(1, act_batch.unsqueeze(1))
-            d_error = torch.abs(torch.clamp(current - y, -1.0, 1.0))
+            bellman_error = y - current
+            d_error = -1.0 * bellman_error.clamp(-1, 1)
             
             optimizer.zero_grad()
             current.backward(d_error)
             optimizer.step()
+
             if num_param_updates % 100 == 0:
                 errors.append(d_error.mean())
+
             num_param_updates += 1
             if num_param_updates % target_update_freq == 0:
                 print("updating target", num_param_updates)
