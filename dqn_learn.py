@@ -257,7 +257,7 @@ def dqn_learing(
                 act_batch = act_batch.cuda()
                 rew_batch = rew_batch.cuda()
                 next_obs_batch = next_obs_batch.cuda()
-                done_mask = done_mask.cuda()
+                not_done_mask = done_mask.cuda()
 
             """
             sum_error = 0
@@ -282,14 +282,9 @@ def dqn_learing(
             with torch.no_grad():
                 y = rew_batch + not_done_mask * gamma * Q_target(next_obs_batch).max(1)[0]
                 y.unsqueeze_(1)
-            print("y:")
-            print(y)
+
             current = Q(obs_batch).gather(1, act_batch.unsqueeze(1))
-            print("current:")
-            print(current)
             d_error = torch.abs(torch.clamp(current - y, -1.0, 1.0))
-            print("d_error:")
-            print(d_error)
 
             optimizer.zero_grad()
             current.backward(d_error)
