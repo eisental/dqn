@@ -17,9 +17,6 @@ import torch.autograd as autograd
 from utils.replay_buffer import ReplayBuffer
 from utils.gym import get_wrapper_by_name
 
-# debug
-import matplotlib.pyplot as plt
-
 USE_CUDA = torch.cuda.is_available()
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
@@ -149,9 +146,6 @@ def dqn_learing(
 
     # Construct the replay buffer
     replay_buffer = ReplayBuffer(replay_buffer_size, frame_history_len)
-
-    # debug
-    errors = []
 
     ###############
     # RUN ENV     #
@@ -291,10 +285,6 @@ def dqn_learing(
         Statistic["best_mean_episode_rewards"].append(best_mean_episode_reward)
 
         if t % LOG_EVERY_N_STEPS == 0 and t > learning_starts:
-            plt.clf()
-            plt.plot(errors)
-            plt.savefig(f"error{t}")
-            plt.close()
             print("Timestep %d" % (t,))
             print("mean reward (100 episodes) %f" % mean_episode_reward)
             print("best mean reward %f" % best_mean_episode_reward)
