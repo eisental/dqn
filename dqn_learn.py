@@ -132,8 +132,8 @@ def dqn_learing(
     # Initialize target q function and q function, i.e. build the model.
     ######
 
-    Q = q_func(input_arg, num_actions)
-    Q_target = q_func(input_arg, num_actions)
+    Q = q_func(input_arg, num_actions).type(dtype)
+    Q_target = q_func(input_arg, num_actions).type(dtype)
 
     if USE_CUDA:
         Q = Q.cuda()
@@ -200,7 +200,7 @@ def dqn_learing(
 
         idx = replay_buffer.store_frame(last_obs)
         encoded_obs = replay_buffer.encode_recent_observation()
-        action = select_epilson_greedy_action(Q, encoded_obs, t)
+        action = select_epilson_greedy_action(Q, encoded_obs, t).item()
         obs, reward, done, info = env.step(action)
         replay_buffer.store_effect(idx, action, reward, done)
 
@@ -246,11 +246,11 @@ def dqn_learing(
             #####
 
             obs_batch, act_batch, rew_batch, next_obs_batch, done_mask = replay_buffer.sample(batch_size)
-            obs_batch = torch.from_numpy(obs_batch).type(dtype)
-            act_batch = torch.from_numpy(act_batch).type(torch.int32)
+            obs_batch = torch.from_numpy(obs_batch).type(dtype) / 255.0
+            act_batch = torch.from_numpy(act_batch).type(torch.long)
             rew_batch = torch.from_numpy(rew_batch).type(dtype)
-            next_obs_batch = torch.from_numpy(next_obs_batch).type(dtype)
-            done_mask = torch.from_numpy(done_mask).type(dtype)
+            next_obs_batch = torch.from_numpy(next_obs_batch).type(dtype) / 255.0
+            not_done_mask = torch.from_numpy(1.0 - done_mask).type(dtype)
 
             if USE_CUDA:
                 obs_batch = obs_batch.cuda()
@@ -259,6 +259,7 @@ def dqn_learing(
                 next_obs_batch = next_obs_batch.cuda()
                 done_mask = done_mask.cuda()
 
+            """
             sum_error = 0
             for j in range(batch_size):
                 with torch.no_grad():
@@ -267,7 +268,7 @@ def dqn_learing(
 
                 obs = obs_batch[j].unsqueeze(0) / 255.0
                 current = Q(obs).squeeze()[act_batch[j]]
-                bellman_error = torch.clamp((current - y), -1.0, 1.0) ** 2
+                bellman_error = torch.clamp((current - y), -1.0, 1.0)
                 optimizer.zero_grad()
                 bellman_error.backward()
                 # print(bellman_error, current, list(map(lambda p: p.grad, list(Q.parameters())[:1])))
@@ -277,6 +278,22 @@ def dqn_learing(
 
             if num_param_updates % 100 == 0:
                 errors.append(sum_error.item())
+            """
+            with torch.no_grad():
+                y = rew_batch + not_done_mask * gamma * Q_target(next_obs_batch).max(1)[0]
+                y.unsqueeze_(1)
+            print("y:")
+            print(y)
+            current = Q(obs_batch).gather(1, act_batch.unsqueeze(1))
+            print("current:")
+            print(current)
+            d_error = torch.abs(torch.clamp(current - y, -1.0, 1.0))
+            print("d_error:")
+            print(d_error)
+
+            optimizer.zero_grad()
+            current.backward(d_error)
+            optimizer.step()
 
             num_param_updates += 1
             if num_param_updates % target_update_freq == 0:
