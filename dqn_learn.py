@@ -206,7 +206,7 @@ def dqn_learing(
 
         idx = replay_buffer.store_frame(last_obs)
         encoded_obs = replay_buffer.encode_recent_observation()
-        action = select_softmax_action(Q, encoded_obs).item()
+        action = select_epilson_greedy_action(Q, encoded_obs, t).item()
         obs, reward, done, info = env.step(action)
         replay_buffer.store_effect(idx, action, reward, done)
 
