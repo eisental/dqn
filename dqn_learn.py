@@ -130,6 +130,8 @@ def dqn_learing(
         obs = torch.from_numpy(obs).type(dtype)
         if USE_CUDA:
             obs = obs.cuda()
+        obs = obs.unsqueeze(0) / 255.0
+
         with torch.no_grad():
             q = model(obs).cpu()
             p = F.softmax(q, dim=0)
