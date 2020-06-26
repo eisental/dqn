@@ -126,6 +126,16 @@ def dqn_learing(
         else:
             return torch.IntTensor([[random.randrange(num_actions)]])
 
+    def select_softmax_action(model, obs):
+        obs = torch.from_numpy(obs).type(dtype)
+        if USE_CUDA:
+            obs = obs.cuda()
+        with torch.no_grad():
+            q = model(obs).cpu()
+            p = F.softmax(q, dim=0)
+            sample = torch.distributions.Categorical(p).sample()
+            return sample
+
     # Initialize target q function and q function, i.e. build the model.
     ######
 
@@ -194,7 +204,7 @@ def dqn_learing(
 
         idx = replay_buffer.store_frame(last_obs)
         encoded_obs = replay_buffer.encode_recent_observation()
-        action = select_epilson_greedy_action(Q, encoded_obs, t).item()
+        action = select_softmax_action(Q, encoded_obs).item()
         obs, reward, done, info = env.step(action)
         replay_buffer.store_effect(idx, action, reward, done)
 
