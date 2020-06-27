@@ -7,7 +7,7 @@ from gym import wrappers
 from utils.seed import set_global_seeds
 from utils.atari_wrapper import wrap_deepmind, wrap_deepmind_ram
 
-def get_env(task, seed):
+def get_env(task, seed, results_path):
     env_id = task.env_id
 
     env = gym.make(env_id)
@@ -15,7 +15,7 @@ def get_env(task, seed):
     set_global_seeds(seed)
     env.seed(seed)
 
-    expt_dir = 'tmp/gym-results'
+    expt_dir = results_path
     env = wrappers.Monitor(env, expt_dir, force=True)
     env = wrap_deepmind(env)
 

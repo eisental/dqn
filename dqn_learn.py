@@ -54,7 +54,8 @@ def dqn_learing(
     learning_starts=50000,
     learning_freq=4,
     frame_history_len=4,
-    target_update_freq=10000):
+    target_update_freq=10000,
+    results_path="."):
 
     """Run Deep Q-learning algorithm.
 
@@ -302,6 +303,6 @@ def dqn_learing(
             sys.stdout.flush()
 
             # Dump statistics to pickle
-            with open('statistics.pkl', 'wb') as f:
+            with open(results_path + '/statistics.pkl', 'wb') as f:
                 pickle.dump(Statistic, f)
                 print("Saved to %s" % 'statistics.pkl')

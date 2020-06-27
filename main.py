@@ -11,13 +11,13 @@ GAMMA = 0.99
 REPLAY_BUFFER_SIZE = 1000000
 LEARNING_STARTS = 50000
 LEARNING_FREQ = 4
-FRAME_HISTORY_LEN = 2
+FRAME_HISTORY_LEN = 4
 TARGER_UPDATE_FREQ = 10000
 LEARNING_RATE = 0.00025
 ALPHA = 0.95
 EPS = 0.01
 
-def main(env, num_timesteps):
+def main(env, num_timesteps, results_path):
 
     def stopping_criterion(env):
         # notice that here t is the number of steps of the wrapped env,
@@ -44,6 +44,7 @@ def main(env, num_timesteps):
         learning_freq=LEARNING_FREQ,
         frame_history_len=FRAME_HISTORY_LEN,
         target_update_freq=TARGER_UPDATE_FREQ,
+        results_path=results_path
     )
 
 if __name__ == '__main__':
@@ -55,6 +56,6 @@ if __name__ == '__main__':
 
     # Run training
     seed = 0 # Use a seed of zero (you may want to randomize the seed!)
-    env = get_env(task, seed)
-
-    main(env, task.max_timesteps)
+    results_path = "."
+    env = get_env(task, seed, results_path)
+    main(env, task.max_timesteps, results_path)
