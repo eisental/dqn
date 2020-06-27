@@ -17,6 +17,8 @@ import torch.autograd as autograd
 from utils.replay_buffer import ReplayBuffer
 from utils.gym import get_wrapper_by_name
 
+import time
+
 USE_CUDA = torch.cuda.is_available()
 dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
@@ -169,6 +171,8 @@ def dqn_learing(
     last_obs = env.reset()
     LOG_EVERY_N_STEPS = 10000
 
+    start_time = time.time()
+
     for t in count():
         ### 1. Check stopping criterion
         if stopping_criterion is not None and stopping_criterion(env):
@@ -296,6 +300,7 @@ def dqn_learing(
 
         if t % LOG_EVERY_N_STEPS == 0 and t > learning_starts:
             print("Timestep %d" % (t,))
+            print("Total Time %ds" % time.time() - start_time)
             print("mean reward (100 episodes) %f" % mean_episode_reward)
             print("best mean reward %f" % best_mean_episode_reward)
             print("episodes %d" % len(episode_rewards))
