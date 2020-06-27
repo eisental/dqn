@@ -300,7 +300,7 @@ def dqn_learing(
 
         if t % LOG_EVERY_N_STEPS == 0 and t > learning_starts:
             print("Timestep %d" % (t,))
-            print("Total Time %d s" % time.time() - start_time)
+            print("Total Time %d s" % (time.time() - start_time))
             print("mean reward (100 episodes) %f" % mean_episode_reward)
             print("best mean reward %f" % best_mean_episode_reward)
             print("episodes %d" % len(episode_rewards))
