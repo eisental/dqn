@@ -284,7 +284,7 @@ def dqn_learing(
 
             num_param_updates += 1
             if num_param_updates % target_update_freq == 0:
-                print("updating target", num_param_updates)
+                # print("updating target", num_param_updates)
                 Q_target.load_state_dict(Q.state_dict())
             #####
 
